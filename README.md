@@ -1,6 +1,6 @@
 # n8n-nodes-gscmagic
 
-An n8n community node for [GSC Magic](https://gscmagic.com): Google Search Console reports and analytics inside your n8n workflows. Setup guide: [gscmagic.com/integrations/n8n](https://gscmagic.com/integrations/n8n).
+An n8n community node for [GSC Magic](https://gscmagic.com): Google Search Console reports and analytics inside your n8n workflows. Setup guide: [gscmagic.com/integrations/n8n](https://gscmagic.com/integrations/n8n). Package: [npmjs.com/package/n8n-nodes-gscmagic](https://www.npmjs.com/package/n8n-nodes-gscmagic).
 
 The node talks to the hosted GSC Magic MCP endpoint over plain HTTPS (JSON-RPC 2.0). It has no runtime dependencies and every operation is read-only.
 

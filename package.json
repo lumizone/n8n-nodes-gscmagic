@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-gscmagic",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "n8n community node for GSC Magic: Google Search Console reports, traffic drops, quick wins and URL inspection",
   "license": "MIT",
   "homepage": "https://gscmagic.com",

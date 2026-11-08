@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.1.1 - 2026-11-08
+
+### Changed
+
+- First release published from GitHub Actions with npm provenance (staged publishing).
+- README links to the npm package and the source repository.
+
+### Fixed
+
+- The weekly traffic-drops example escapes page URLs before putting them into the e-mail HTML.
+
 ## 0.1.0 - 2026-11-08
 
 ### Added

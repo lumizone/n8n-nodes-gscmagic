@@ -107,7 +107,7 @@
         "toEmail": "you@example.com",
         "subject": "={{ 'Traffic drops for ' + $json.site + ': ' + $json.current.startDate + ' to ' + $json.current.endDate }}",
         "emailFormat": "html",
-        "html": "={{ '<p>Clicks: ' + $json.totals_current.clicks + ' (previous period: ' + $json.totals_previous.clicks + ')</p><table border=\"1\" cellpadding=\"6\" cellspacing=\"0\"><tr><th align=\"left\">Page</th><th>Before</th><th>After</th><th>Change</th></tr>' + $json.losers.map(r => '<tr><td>' + r.key + '</td><td>' + r.clicks_before + '</td><td>' + r.clicks_after + '</td><td>' + r.clicks_delta + '</td></tr>').join('') + '</table>' }}",
+        "html": "={{ '<p>Clicks: ' + $json.totals_current.clicks + ' (previous period: ' + $json.totals_previous.clicks + ')</p><table border=\"1\" cellpadding=\"6\" cellspacing=\"0\"><tr><th align=\"left\">Page</th><th>Before</th><th>After</th><th>Change</th></tr>' + $json.losers.map(r => '<tr><td>' + String(r.key).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</td><td>' + r.clicks_before + '</td><td>' + r.clicks_after + '</td><td>' + r.clicks_delta + '</td></tr>').join('') + '</table>' }}",
         "options": {
           "appendAttribution": false,
           "attachments": "chart"
