@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
-- n8n verification lint findings: category (`Marketing & Content`), themed icon (light and dark), `httpRequest` in the credential test (with a `fetch` fallback because n8n's credential-test context only offers the legacy helper), n8n error classes (`NodeApiError`) instead of custom errors, removed `overrides`.
+- n8n verification lint findings: category (`Marketing & Content`), themed icon (light and dark), a declarative credential test (n8n's custom credential-test context only offers the deprecated request helper; a bad token shows n8n's generic Unauthorized there), n8n error classes (`NodeApiError`) instead of custom errors, removed `overrides`.
 
 ### Changed
 

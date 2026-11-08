@@ -1,5 +1,6 @@
 import type {
 	IAuthenticateGeneric,
+	ICredentialTestRequest,
 	ICredentialType,
 	INodeProperties,
 } from 'n8n-workflow';
@@ -41,6 +42,22 @@ export class GscMagicApi implements ICredentialType {
 			headers: {
 				Authorization: '=Bearer {{$credentials.accessToken}}',
 			},
+		},
+	};
+
+	// Lists the tools (does not count against the plan). A bad token shows n8n's generic "Unauthorized".
+	test: ICredentialTestRequest = {
+		request: {
+			baseURL: '={{$credentials.endpoint}}',
+			url: '',
+			method: 'POST',
+			headers: {
+				Accept: 'application/json, text/event-stream',
+				'Content-Type': 'application/json',
+			},
+			body: { jsonrpc: '2.0', id: 1, method: 'tools/list' },
+			json: true,
+			disableFollowRedirect: true,
 		},
 	};
 }

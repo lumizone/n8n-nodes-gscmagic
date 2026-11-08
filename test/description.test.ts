@@ -20,11 +20,15 @@ test('credential stores the token as a secret and sends it as a Bearer header', 
 	assert.equal(endpoint?.default, 'https://mcp.gscmagic.com/mcp');
 });
 
-test('credential is tested by the node, not by a generic request', () => {
-	assert.equal('test' in credential, false);
+test('credential has a declarative test that lists the tools from the configured endpoint', () => {
+	const request = credential.test.request;
+	assert.equal(request.baseURL, '={{$credentials.endpoint}}');
+	assert.equal(request.method, 'POST');
+	assert.deepEqual(request.body, { jsonrpc: '2.0', id: 1, method: 'tools/list' });
+	assert.equal(request.headers?.Accept, 'application/json, text/event-stream');
+	assert.equal(request.disableFollowRedirect, true);
 	const entry = node.description.credentials?.find((c) => c.name === 'gscMagicApi');
-	assert.equal(entry?.testedBy, 'gscMagicCredentialTest');
-	assert.ok(node.methods.credentialTest.gscMagicCredentialTest);
+	assert.equal(entry?.testedBy, undefined);
 });
 
 test('node is a usable AI tool and exposes exactly the reviewed operations', () => {

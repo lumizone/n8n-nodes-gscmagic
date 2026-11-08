@@ -8,7 +8,6 @@ import type {
 import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
 import { fieldProperties, operationProperty } from './descriptions';
-import { gscMagicCredentialTest } from './methods/credentialTest';
 import { getTools, siteSearch } from './methods/loadOptions';
 import { McpError } from './shared/mcp';
 import { buildToolArguments, getOperation, splitRows } from './shared/operations';
@@ -65,12 +64,11 @@ export class GscMagic implements INodeType {
 		inputs: [NodeConnectionTypes.Main],
 		outputs: [NodeConnectionTypes.Main],
 		usableAsTool: true,
-		credentials: [{ name: 'gscMagicApi', required: true, testedBy: 'gscMagicCredentialTest' }],
+		credentials: [{ name: 'gscMagicApi', required: true }],
 		properties: [operationProperty, ...fieldProperties],
 	};
 
 	methods = {
-		credentialTest: { gscMagicCredentialTest },
 		loadOptions: { getTools },
 		listSearch: { siteSearch },
 	};

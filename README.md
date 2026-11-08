@@ -30,7 +30,7 @@ After n8n verification the node can also be installed straight from the node pan
 2. In n8n create a **GSC Magic API** credential and paste the token (it starts with `gsm_`).
 3. Leave **Endpoint** as `https://mcp.gscmagic.com/mcp` unless you test against your own installation. Remote endpoints must use HTTPS; plain HTTP is accepted only for `localhost`, `127.0.0.1` and `[::1]`.
 
-The credential test lists the available tools (it does not count against your plan), so a wrong, expired or revoked token fails right away with a clear message.
+The credential test lists the available tools (it does not count against your plan), so a wrong, expired or revoked token fails right away. n8n shows its generic "Unauthorized" there; when you run the node, a rejected token gets a plain-language message.
 
 ## Operations
 
