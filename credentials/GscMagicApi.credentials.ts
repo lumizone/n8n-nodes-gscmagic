@@ -1,6 +1,5 @@
 import type {
 	IAuthenticateGeneric,
-	ICredentialTestRequest,
 	ICredentialType,
 	INodeProperties,
 } from 'n8n-workflow';
@@ -39,19 +38,6 @@ export class GscMagicApi implements ICredentialType {
 			headers: {
 				Authorization: '=Bearer {{$credentials.accessToken}}',
 			},
-		},
-	};
-
-	test: ICredentialTestRequest = {
-		request: {
-			baseURL: '={{$credentials.endpoint}}',
-			url: '',
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				Accept: 'application/json, text/event-stream',
-			},
-			body: { jsonrpc: '2.0', id: 1, method: 'tools/list' },
 		},
 	};
 }

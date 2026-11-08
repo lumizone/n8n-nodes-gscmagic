@@ -320,7 +320,8 @@ export const fieldProperties: INodeProperties[] = [
 				name: 'dataState',
 				type: 'options',
 				default: 'final',
-				description: 'Whether to include fresh data that Google has not finalized yet',
+				description:
+					'Whether to include fresh data that Google has not finalized yet. Leave unset when the Hour dimension is selected (it needs Hourly All, which is set automatically).',
 				options: [
 					{ name: 'All (Include Fresh Data)', value: 'all' },
 					{ name: 'Final', value: 'final' },
