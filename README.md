@@ -109,15 +109,13 @@ Requirements: Node.js 22.22 or newer for development and npm 11 or newer. The te
 
 ## Publishing (maintainers)
 
-n8n verification requires every release to be published from GitHub Actions with npm provenance. `.github/workflows/publish.yml` does this on a version tag: it checks that the tag equals the `package.json` version, runs `npm run verify`, then `npm run release`, which inside GitHub Actions lints, builds and runs `npm publish` with `NPM_CONFIG_PROVENANCE=true` (the workflow has `id-token: write`).
+n8n verification needs releases published from GitHub Actions with npm provenance. `.github/workflows/publish.yml` runs on a version tag (no `v` prefix, equal to the `package.json` version): it verifies the package, builds it and runs `npm stage publish --provenance` with a **stage-only** granular npm token (repository secret `NPM_TOKEN`). The version then waits on npmjs.com under **Staged Packages** until a maintainer approves it with 2FA.
 
-One-time setup:
+1. Bump `version` in `package.json` and update `CHANGELOG.md`; commit and push.
+2. `git tag X.Y.Z && git push origin X.Y.Z`.
+3. Approve the version on npmjs.com → Staged Packages.
 
-1. Create the GitHub repository `lumizone/n8n-nodes-gscmagic` and push `main`.
-2. On npmjs.com create a granular access token that can publish and bypasses 2FA, and save it as the repository secret `NPM_TOKEN`. A brand new package cannot use a Trusted Publisher yet.
-3. Release: `git tag 0.1.0 && git push origin 0.1.0` (the tag has no `v` prefix and must equal the version in `package.json`). Do not run `npm run release` locally for the first release, it would bump the version.
-4. After the first release, add a Trusted Publisher for the repository and the workflow `publish.yml` on npmjs.com, then remove `NPM_TOKEN` and the `env` block of the publish step.
-5. Submit the package for verification in the n8n Creator Portal.
+A brand-new package cannot be staged, so the very first version (0.1.0) was published once from a laptop: `npm run build && RELEASE_MODE=1 npm publish --access public`.
 
 ## Release verification
 

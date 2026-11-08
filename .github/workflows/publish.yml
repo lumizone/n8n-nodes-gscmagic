@@ -38,12 +38,17 @@ jobs:
       - name: Audit production dependency surface
         run: npm audit --omit=dev --omit=peer --audit-level=high
 
-      - name: Publish with provenance
-        run: npm run release
+      - name: Update npm (staged publishing needs npm 11.15+)
+        run: npm install -g npm@latest
+
+      - name: Build
+        run: npm run build
+
+      - name: Stage the release on npm (approve it on npmjs.com -> Staged Packages)
+        # The token is a stage-only granular token: CI uploads the version with
+        # provenance, and the owner approves it with 2FA on npmjs.com. A brand-new
+        # package cannot be staged, so 0.1.0 was published once from a laptop.
+        run: npm stage publish --access public --provenance
         env:
-          # `n8n-node release` runs `npm publish` with provenance in GitHub Actions; set explicitly for clarity.
-          NPM_CONFIG_PROVENANCE: 'true'
-          # First publish of a new package cannot use a Trusted Publisher yet: use a
-          # granular npm token that can publish and bypasses 2FA. After the first
-          # release, configure the Trusted Publisher on npmjs.com and drop this token.
+          RELEASE_MODE: '1'
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
