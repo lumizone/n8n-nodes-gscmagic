@@ -20,7 +20,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: ['20.19.0', '22.22.0', '24']
+        # n8n 2.x requires Node 24, and the release workflow builds on 24; the dev tooling
+        # (@n8n/node-cli 0.55, npm 11 lockfile) does not install on older npm.
+        node-version: ['24']
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
