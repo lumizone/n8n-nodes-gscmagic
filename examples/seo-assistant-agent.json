@@ -1,0 +1,202 @@
+{
+  "name": "GSC Magic - SEO assistant agent",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## SEO assistant\nChat with an agent that can call GSC Magic as a tool. Add a chat model credential (any provider) and the **GSC Magic API** credential, then open the chat.\n\nEach GSC Magic tool node fixes one operation; the agent fills in the site. Use a read-only token.",
+        "height": 220,
+        "width": 420
+      },
+      "id": "b2000000-0000-4000-8000-000000000001",
+      "name": "Setup notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        -300
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "b2000000-0000-4000-8000-000000000002",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "b2000000-0000-4000-8000-0000000000a1"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are an SEO analyst. Use the GSC Magic tool to answer questions about Google Search Console data. List the sites first if you need the exact property name. Prefer the Traffic Drops, Quick Wins and Content Decay operations for analysis. Never invent numbers; say so when a call returns nothing."
+        }
+      },
+      "id": "b2000000-0000-4000-8000-000000000003",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        260,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "b2000000-0000-4000-8000-000000000004",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        200,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "listSites"
+      },
+      "id": "b2000000-0000-4000-8000-000000000005",
+      "name": "GSC Magic List Sites",
+      "type": "n8n-nodes-gscmagic.gscMagicTool",
+      "typeVersion": 1,
+      "position": [
+        360,
+        240
+      ],
+      "credentials": {
+        "gscMagicApi": {
+          "id": "",
+          "name": "GSC Magic API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "trafficDrops",
+        "site": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $fromAI('site', 'Search Console property or domain, for example example.com', 'string') }}"
+        },
+        "dateRange": "last_28_days",
+        "dimension": "page",
+        "limit": 10
+      },
+      "id": "b2000000-0000-4000-8000-000000000006",
+      "name": "GSC Magic Traffic Drops",
+      "type": "n8n-nodes-gscmagic.gscMagicTool",
+      "typeVersion": 1,
+      "position": [
+        520,
+        240
+      ],
+      "credentials": {
+        "gscMagicApi": {
+          "id": "",
+          "name": "GSC Magic API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "quickWins",
+        "site": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $fromAI('site', 'Search Console property or domain, for example example.com', 'string') }}"
+        },
+        "dateRange": "last_28_days",
+        "minImpressions": 100,
+        "limit": 15
+      },
+      "id": "b2000000-0000-4000-8000-000000000007",
+      "name": "GSC Magic Quick Wins",
+      "type": "n8n-nodes-gscmagic.gscMagicTool",
+      "typeVersion": 1,
+      "position": [
+        680,
+        240
+      ],
+      "credentials": {
+        "gscMagicApi": {
+          "id": "",
+          "name": "GSC Magic API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GSC Magic List Sites": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GSC Magic Traffic Drops": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GSC Magic Quick Wins": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

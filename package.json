@@ -1,0 +1,81 @@
+{
+  "name": "n8n-nodes-gscmagic",
+  "version": "0.1.0",
+  "description": "n8n community node for GSC Magic: Google Search Console reports, traffic drops, quick wins and URL inspection",
+  "license": "MIT",
+  "homepage": "https://gscmagic.com",
+  "keywords": [
+    "n8n-community-node-package",
+    "gscmagic",
+    "google-search-console",
+    "seo",
+    "mcp",
+    "automation"
+  ],
+  "author": {
+    "name": "Lumi Zone Łukasz Blania",
+    "email": "contact@gscmagic.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lumizone/n8n-nodes-gscmagic.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lumizone/n8n-nodes-gscmagic/issues"
+  },
+  "scripts": {
+    "build": "n8n-node build",
+    "build:watch": "tsc --watch",
+    "dev": "n8n-node dev",
+    "lint": "n8n-node lint",
+    "lint:fix": "n8n-node lint --fix",
+    "test": "tsx --test test/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "verify": "npm run lint && npm run typecheck && npm test && npm run build",
+    "release": "n8n-node release",
+    "prepublishOnly": "n8n-node prerelease"
+  },
+  "files": [
+    "dist",
+    "examples",
+    "CHANGELOG.md"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "strict": true,
+    "credentials": [
+      "dist/credentials/GscMagicApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/GscMagic/GscMagic.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@n8n/node-cli": "^0.23.0",
+    "eslint": "9.39.4",
+    "prettier": "3.8.3",
+    "release-it": "20.2.0",
+    "tsx": "^4.23.15",
+    "typescript": "5.9.3"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "engines": {
+    "node": ">=20.19.0 <25"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "overrides": {
+    "@langchain/core": {
+      "zod": "4.6.7"
+    },
+    "@langchain/classic": {
+      "zod": "4.6.7"
+    },
+    "langchain": {
+      "zod": "4.6.7"
+    }
+  }
+}

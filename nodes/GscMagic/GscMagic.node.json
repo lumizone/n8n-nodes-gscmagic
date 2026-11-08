@@ -1,0 +1,21 @@
+{
+  "node": "n8n-nodes-gscmagic.gscMagic",
+  "nodeVersion": "1.0",
+  "codexVersion": "1.0",
+  "categories": ["Marketing", "Analytics"],
+  "subcategories": {
+    "Marketing": ["SEO"]
+  },
+  "resources": {
+    "credentialDocumentation": [
+      {
+        "url": "https://github.com/lumizone/n8n-nodes-gscmagic#credentials"
+      }
+    ],
+    "primaryDocumentation": [
+      {
+        "url": "https://github.com/lumizone/n8n-nodes-gscmagic#readme"
+      }
+    ]
+  }
+}

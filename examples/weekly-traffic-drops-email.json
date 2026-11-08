@@ -1,0 +1,167 @@
+{
+  "name": "GSC Magic - weekly traffic drops by email",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Weekly traffic drops\n1. Add your **GSC Magic API** credential to the GSC Magic node (token from app.gscmagic.com > Connect > Access tokens, read-only is enough).\n2. Pick your site in the GSC Magic node.\n3. Fill in the sender and recipient in the Send Email node and connect an SMTP credential.\n4. Activate the workflow.",
+        "height": 220,
+        "width": 420
+      },
+      "id": "a1000000-0000-4000-8000-000000000001",
+      "name": "Setup notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        -260
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 8,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "a1000000-0000-4000-8000-000000000002",
+      "name": "Every Monday 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "trafficDrops",
+        "site": {
+          "__rl": true,
+          "mode": "id",
+          "value": "example.com"
+        },
+        "dateRange": "last_7_days",
+        "dimension": "page",
+        "limit": 10,
+        "includeChart": true
+      },
+      "id": "a1000000-0000-4000-8000-000000000003",
+      "name": "GSC Magic",
+      "type": "n8n-nodes-gscmagic.gscMagic",
+      "typeVersion": 1,
+      "position": [
+        260,
+        0
+      ],
+      "credentials": {
+        "gscMagicApi": {
+          "id": "",
+          "name": "GSC Magic API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "has-losers",
+              "leftValue": "={{ $json.losers.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000004",
+      "name": "Any losers?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        520,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "seo@example.com",
+        "toEmail": "you@example.com",
+        "subject": "={{ 'Traffic drops for ' + $json.site + ': ' + $json.current.startDate + ' to ' + $json.current.endDate }}",
+        "emailFormat": "html",
+        "html": "={{ '<p>Clicks: ' + $json.totals_current.clicks + ' (previous period: ' + $json.totals_previous.clicks + ')</p><table border=\"1\" cellpadding=\"6\" cellspacing=\"0\"><tr><th align=\"left\">Page</th><th>Before</th><th>After</th><th>Change</th></tr>' + $json.losers.map(r => '<tr><td>' + r.key + '</td><td>' + r.clicks_before + '</td><td>' + r.clicks_after + '</td><td>' + r.clicks_delta + '</td></tr>').join('') + '</table>' }}",
+        "options": {
+          "appendAttribution": false,
+          "attachments": "chart"
+        }
+      },
+      "id": "a1000000-0000-4000-8000-000000000005",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        780,
+        -80
+      ]
+    }
+  ],
+  "connections": {
+    "Every Monday 08:00": {
+      "main": [
+        [
+          {
+            "node": "GSC Magic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GSC Magic": {
+      "main": [
+        [
+          {
+            "node": "Any losers?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Any losers?": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
