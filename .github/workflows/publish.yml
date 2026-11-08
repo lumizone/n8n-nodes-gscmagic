@@ -37,7 +37,8 @@ jobs:
 
       - name: Package ships no runtime dependencies
         # The published package has zero dependencies; n8n-workflow is a peer provided by n8n itself.
-        run: node -e "const p=require('./package.json'); const d=Object.keys(p.dependencies||{}); if (d.length) { throw new Error('Runtime dependencies are not allowed: ' + d.join(', ')); }"
+        run: |
+          node -e "const p=require('./package.json'); const d=Object.keys(p.dependencies||{}); if (d.length) { throw new Error('Runtime dependencies are not allowed: ' + d.join(', ')); }"
 
       - name: Audit dev tooling (informational)
         # Findings come from n8n's own packages (peer/dev tooling, e.g. zod via n8n-workflow) and are not shipped.
