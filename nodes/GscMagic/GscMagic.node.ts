@@ -4,7 +4,6 @@ import type {
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
-	JsonObject,
 } from 'n8n-workflow';
 import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
@@ -13,7 +12,7 @@ import { gscMagicCredentialTest } from './methods/credentialTest';
 import { getTools, siteSearch } from './methods/loadOptions';
 import { McpError } from './shared/mcp';
 import { buildToolArguments, getOperation, splitRows } from './shared/operations';
-import { AuthRejectedError, HttpFailure, callTool } from './shared/transport';
+import { callTool } from './shared/transport';
 
 const RANGE = ['dateRange', 'startDate', 'endDate'];
 const PARAMETERS: Record<string, string[]> = {
@@ -45,21 +44,8 @@ function toNodeError(
 	error: unknown,
 	index: number,
 ): NodeApiError | NodeOperationError {
+	if (error instanceof NodeApiError || error instanceof NodeOperationError) return error;
 	const node = context.getNode();
-	if (error instanceof AuthRejectedError) {
-		return new NodeApiError(node, { message: error.message } as JsonObject, {
-			message: error.message,
-			httpCode: '401',
-			itemIndex: index,
-		});
-	}
-	if (error instanceof HttpFailure) {
-		return new NodeApiError(node, { message: error.message } as JsonObject, {
-			message: error.message,
-			httpCode: error.httpCode,
-			itemIndex: index,
-		});
-	}
 	if (error instanceof McpError) {
 		return new NodeOperationError(node, error.message, { itemIndex: index });
 	}
@@ -70,7 +56,7 @@ export class GscMagic implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'GSC Magic',
 		name: 'gscMagic',
-		icon: 'file:gscmagic.svg',
+		icon: { light: 'file:gscmagic.svg', dark: 'file:gscmagic.dark.svg' },
 		group: ['transform'],
 		version: 1,
 		subtitle: '={{$parameter["operation"]}}',
@@ -105,7 +91,7 @@ export class GscMagic implements INodeType {
 				if (!toolName) throw new NodeOperationError(this.getNode(), 'Choose a tool to call', { itemIndex: index });
 				const args = buildToolArguments(operation, params);
 
-				const result = await callTool.call(this, toolName, args);
+				const result = await callTool.call(this, toolName, args, index);
 
 				const split =
 					operation !== 'inspectUrl' && this.getNodeParameter('splitIntoItems', index, false) === true;

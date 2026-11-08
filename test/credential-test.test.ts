@@ -1,4 +1,4 @@
-/* eslint-disable @n8n/community-nodes/no-restricted-imports */
+/* eslint-disable @n8n/community-nodes/no-restricted-imports, @n8n/community-nodes/no-restricted-globals */
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { ICredentialTestFunctions } from 'n8n-workflow';
@@ -13,7 +13,7 @@ function credential(value: { accessToken: string; endpoint: string }) {
 }
 
 function context(request: (options: Record<string, unknown>) => unknown) {
-	return { helpers: { request: async (o: Record<string, unknown>) => request(o) } } as unknown as ICredentialTestFunctions;
+	return { helpers: { httpRequest: async (o: Record<string, unknown>) => request(o) } } as unknown as ICredentialTestFunctions;
 }
 
 test('a wrong or revoked token (HTTP 401) gets the friendly message', async () => {
@@ -39,8 +39,8 @@ test('a good token lists the tools with the expected request and does not follow
 	);
 	assert.equal(result.status, 'OK');
 	assert.match(result.message, /2 tools/);
-	assert.equal(options?.uri, 'https://mcp.gscmagic.com/mcp');
-	assert.equal(options?.followRedirect, false);
+	assert.equal(options?.url, 'https://mcp.gscmagic.com/mcp');
+	assert.equal(options?.disableFollowRedirect, true);
 	assert.deepEqual(options?.body, { jsonrpc: '2.0', id: 1, method: 'tools/list' });
 	const headers = options?.headers as Record<string, string>;
 	assert.equal(headers.Authorization, `Bearer ${TOKEN}`);
@@ -73,4 +73,32 @@ test('other failures redact the token', async () => {
 	assert.equal(result.status, 'Error');
 	assert.equal(result.message.includes(TOKEN), false);
 	assert.match(result.message, /ECONNREFUSED/);
+});
+
+test('without helpers.httpRequest (current n8n credential-test context) it falls back to fetch, still friendly on 401', async () => {
+	const real = globalThis.fetch;
+	const seen: Array<{ url: string; init: RequestInit }> = [];
+	let status = 200;
+	globalThis.fetch = (async (url: string, init: RequestInit) => {
+		seen.push({ url, init });
+		return new Response(
+			status === 200 ? JSON.stringify({ jsonrpc: '2.0', id: 1, result: { tools: [{ name: 'a' }] } }) : 'nope',
+			{ status },
+		);
+	}) as typeof fetch;
+	try {
+		const bare = { helpers: {} } as unknown as ICredentialTestFunctions;
+		const cred = credential({ accessToken: TOKEN, endpoint: 'https://mcp.gscmagic.com/mcp' });
+		const ok = await gscMagicCredentialTest.call(bare, cred);
+		assert.equal(ok.status, 'OK');
+		assert.equal(seen[0].init.redirect, 'manual');
+		assert.equal((seen[0].init.headers as Record<string, string>).Authorization, `Bearer ${TOKEN}`);
+		status = 401;
+		assert.deepEqual(await gscMagicCredentialTest.call(bare, cred), { status: 'Error', message: AUTH_REJECTED_MESSAGE });
+		status = 302;
+		const redirected = await gscMagicCredentialTest.call(bare, cred);
+		assert.equal(redirected.status, 'Error');
+	} finally {
+		globalThis.fetch = real;
+	}
 });

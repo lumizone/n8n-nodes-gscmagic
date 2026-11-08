@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.1.2 - 2026-11-08
+
+### Fixed
+
+- n8n verification lint findings: category (`Marketing & Content`), themed icon (light and dark), `httpRequest` in the credential test (with a `fetch` fallback because n8n's credential-test context only offers the legacy helper), n8n error classes (`NodeApiError`) instead of custom errors, removed `overrides`.
+
+### Changed
+
+- `npm run lint:scan` (part of `npm run verify`) runs the n8n scanner's exact ESLint gate on the source and the packed tarball.
+
 ## 0.1.1 - 2026-11-08
 
 ### Changed

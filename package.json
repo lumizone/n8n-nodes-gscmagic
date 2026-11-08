@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-gscmagic",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "n8n community node for GSC Magic: Google Search Console reports, traffic drops, quick wins and URL inspection",
   "license": "MIT",
   "homepage": "https://gscmagic.com",
@@ -31,9 +31,10 @@
     "lint:fix": "n8n-node lint --fix",
     "test": "tsx --test test/*.test.ts",
     "typecheck": "tsc --noEmit",
-    "verify": "npm run lint && npm run typecheck && npm test && npm run build",
+    "verify": "npm run lint && npm run typecheck && npm test && npm run build && npm run lint:scan",
     "release": "n8n-node release",
-    "prepublishOnly": "n8n-node prerelease"
+    "prepublishOnly": "n8n-node prerelease",
+    "lint:scan": "node scripts/scan-lint.mjs"
   },
   "files": [
     "dist",
@@ -51,9 +52,9 @@
     ]
   },
   "devDependencies": {
-    "@n8n/node-cli": "^0.23.0",
-    "eslint": "9.39.4",
-    "prettier": "3.8.3",
+    "@n8n/node-cli": "^0.55.5",
+    "eslint": "9.29.0",
+    "prettier": "3.6.2",
     "release-it": "20.2.0",
     "tsx": "^4.23.15",
     "typescript": "5.9.3"
@@ -66,16 +67,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "overrides": {
-    "@langchain/core": {
-      "zod": "4.6.7"
-    },
-    "@langchain/classic": {
-      "zod": "4.6.7"
-    },
-    "langchain": {
-      "zod": "4.6.7"
-    }
   }
 }

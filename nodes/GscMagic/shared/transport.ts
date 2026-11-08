@@ -2,7 +2,9 @@ import type {
 	IExecuteFunctions,
 	IHttpRequestOptions,
 	ILoadOptionsFunctions,
+	JsonObject,
 } from 'n8n-workflow';
+import { NodeApiError } from 'n8n-workflow';
 
 import {
 	AUTH_REJECTED_MESSAGE,
@@ -25,25 +27,6 @@ type GscMagicFunctions = IExecuteFunctions | ILoadOptionsFunctions;
 
 export const CREDENTIAL_NAME = 'gscMagicApi';
 
-/** HTTP 401 from GSC Magic. The message is safe to show to the user. */
-export class AuthRejectedError extends Error {
-	constructor() {
-		super(AUTH_REJECTED_MESSAGE);
-		this.name = 'AuthRejectedError';
-	}
-}
-
-/** Any other HTTP failure. The message is redacted and carries no request headers. */
-export class HttpFailure extends Error {
-	readonly httpCode?: string;
-
-	constructor(message: string, httpCode?: string) {
-		super(message);
-		this.name = 'HttpFailure';
-		this.httpCode = httpCode;
-	}
-}
-
 export function buildRequestOptions(
 	url: string,
 	body: RpcRequest,
@@ -65,6 +48,7 @@ async function send(
 	this: GscMagicFunctions,
 	body: RpcRequest,
 	timeout: number,
+	itemIndex?: number,
 ): Promise<unknown> {
 	const credentials = await this.getCredentials(CREDENTIAL_NAME);
 	const endpoint = normalizeEndpoint(String(credentials.endpoint ?? ''));
@@ -77,12 +61,22 @@ async function send(
 			buildRequestOptions(endpoint, body, timeout),
 		);
 	} catch (error) {
-		if (isUnauthorized(error)) throw new AuthRejectedError();
+		if (isUnauthorized(error)) {
+			// The message is safe to show to the user.
+			throw new NodeApiError(this.getNode(), { message: AUTH_REJECTED_MESSAGE } as JsonObject, {
+				message: AUTH_REJECTED_MESSAGE,
+				httpCode: '401',
+				itemIndex,
+			});
+		}
 		const e = error as { message?: unknown; httpCode?: unknown };
-		throw new HttpFailure(
-			redactSecret(String(e?.message ?? 'Request to GSC Magic failed'), token),
-			e?.httpCode === undefined ? undefined : String(e.httpCode),
-		);
+		// Redacted and carries no request headers.
+		const message = redactSecret(String(e?.message ?? 'Request to GSC Magic failed'), token);
+		throw new NodeApiError(this.getNode(), { message } as JsonObject, {
+			message,
+			httpCode: e?.httpCode === undefined ? undefined : String(e.httpCode),
+			itemIndex,
+		});
 	}
 	return unwrapRpc(parseRpcResponse(response, body.id));
 }
@@ -91,8 +85,9 @@ export async function callTool(
 	this: GscMagicFunctions,
 	name: string,
 	args: Record<string, unknown>,
+	itemIndex?: number,
 ): Promise<ToolResult> {
-	const result = await send.call(this, buildToolCall(name, args), 120000);
+	const result = await send.call(this, buildToolCall(name, args), 120000, itemIndex);
 	return extractToolResult(result);
 }
 

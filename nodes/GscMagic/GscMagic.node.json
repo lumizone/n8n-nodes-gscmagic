@@ -2,9 +2,9 @@
   "node": "n8n-nodes-gscmagic.gscMagic",
   "nodeVersion": "1.0",
   "codexVersion": "1.0",
-  "categories": ["Marketing", "Analytics"],
+  "categories": ["Marketing & Content", "Analytics"],
   "subcategories": {
-    "Marketing": ["SEO"]
+    "Marketing & Content": ["SEO"]
   },
   "resources": {
     "credentialDocumentation": [

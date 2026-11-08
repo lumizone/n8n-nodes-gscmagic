@@ -7,7 +7,10 @@ import type {
 export class GscMagicApi implements ICredentialType {
 	name = 'gscMagicApi';
 	displayName = 'GSC Magic API';
-	icon = 'file:../nodes/GscMagic/gscmagic.svg' as const;
+	icon = {
+		light: 'file:../nodes/GscMagic/gscmagic.svg',
+		dark: 'file:../nodes/GscMagic/gscmagic.dark.svg',
+	} as const;
 	documentationUrl = 'https://gscmagic.com/integrations';
 
 	properties: INodeProperties[] = [

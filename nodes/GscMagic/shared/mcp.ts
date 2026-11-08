@@ -65,12 +65,9 @@ function isLoopback(hostname: string): boolean {
 }
 
 export function normalizeEndpoint(value: string): string {
-	let url: URL;
-	try {
-		url = new URL(value.trim());
-	} catch {
-		throw new Error('Endpoint must be a valid absolute URL');
-	}
+	const trimmed = value.trim();
+	if (!URL.canParse(trimmed)) throw new Error('Endpoint must be a valid absolute URL');
+	const url = new URL(trimmed);
 	if (url.username || url.password) {
 		throw new Error('Endpoint must not include credentials');
 	}

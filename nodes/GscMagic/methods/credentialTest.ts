@@ -1,12 +1,12 @@
 import type {
 	ICredentialTestFunction,
 	ICredentialTestFunctions,
+	IHttpRequestOptions,
 	INodeCredentialTestResult,
 } from 'n8n-workflow';
 
 import {
 	AUTH_REJECTED_MESSAGE,
-	REQUEST_HEADERS,
 	buildRpcRequest,
 	extractTools,
 	isUnauthorized,
@@ -14,7 +14,53 @@ import {
 	parseRpcResponse,
 	redactSecret,
 	unwrapRpc,
+	type RpcRequest,
 } from '../shared/mcp';
+import { buildRequestOptions } from '../shared/transport';
+
+const TEST_TIMEOUT_MS = 30000;
+
+type HttpRequestHelper = (options: IHttpRequestOptions) => Promise<unknown>;
+
+/**
+ * POSTs the JSON-RPC request without following redirects. Uses `helpers.httpRequest` when the n8n
+ * runtime exposes it. Today n8n's credential-test context only offers the deprecated `request`
+ * helper (not `httpRequest`), so the fallback is the built-in `fetch`, which works on Node 20+.
+ */
+async function postJson(
+	context: ICredentialTestFunctions,
+	url: string,
+	body: RpcRequest,
+	token: string,
+): Promise<unknown> {
+	const headers = { ...buildRequestOptions(url, body, TEST_TIMEOUT_MS).headers, Authorization: `Bearer ${token}` };
+	const httpRequest = (context.helpers as unknown as { httpRequest?: HttpRequestHelper }).httpRequest;
+	if (typeof httpRequest === 'function') {
+		return await httpRequest.call(context.helpers, {
+			...buildRequestOptions(url, body, TEST_TIMEOUT_MS),
+			headers,
+		});
+	}
+	const response = await fetch(url, {
+		method: 'POST',
+		headers,
+		body: JSON.stringify(body),
+		redirect: 'manual',
+		signal: AbortSignal.timeout(TEST_TIMEOUT_MS),
+	});
+	if (response.status === 401) throw Object.assign(new Error('Unauthorized'), { httpCode: '401' });
+	if (!response.ok) {
+		throw Object.assign(new Error(`GSC Magic responded with HTTP ${response.status}`), {
+			httpCode: String(response.status),
+		});
+	}
+	const text = await response.text();
+	try {
+		return JSON.parse(text);
+	} catch {
+		return text;
+	}
+}
 
 /**
  * Credential test: lists the tools (does not count against the plan). A wrong, expired or revoked
@@ -32,18 +78,7 @@ export const gscMagicCredentialTest: ICredentialTestFunction = async function (
 	try {
 		const endpoint = normalizeEndpoint(String(data.endpoint ?? ''));
 		const request = buildRpcRequest('tools/list');
-		// ICredentialTestFunctions currently exposes only the legacy request helper.
-		// eslint-disable-next-line @n8n/community-nodes/no-deprecated-workflow-functions
-		const response: unknown = await this.helpers.request({
-			method: 'POST',
-			uri: endpoint,
-			headers: { ...REQUEST_HEADERS, Authorization: `Bearer ${token}` },
-			body: request,
-			json: true,
-			timeout: 30000,
-			followRedirect: false,
-			followAllRedirects: false,
-		});
+		const response = await postJson(this, endpoint, request, token);
 		const tools = extractTools(unwrapRpc(parseRpcResponse(response, request.id)));
 		return {
 			status: 'OK',

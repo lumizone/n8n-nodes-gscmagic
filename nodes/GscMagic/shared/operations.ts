@@ -129,18 +129,24 @@ function site(params: IDataObject): string {
 	return value;
 }
 
+const INVALID_JSON = Symbol('invalid-json');
+
+function tryParseJson(text: string): unknown {
+	try {
+		return JSON.parse(text);
+	} catch {
+		return INVALID_JSON;
+	}
+}
+
 function parseJsonObject(value: unknown, label: string): Record<string, unknown> {
 	if (value && typeof value === 'object' && !Array.isArray(value)) {
 		return value as Record<string, unknown>;
 	}
 	const text = String(value ?? '').trim();
 	if (!text) return {};
-	let parsed: unknown;
-	try {
-		parsed = JSON.parse(text);
-	} catch {
-		throw new Error(`${label} must be valid JSON`);
-	}
+	const parsed = tryParseJson(text);
+	if (parsed === INVALID_JSON) throw new Error(`${label} must be valid JSON`);
 	if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
 		throw new Error(`${label} must be a JSON object`);
 	}
